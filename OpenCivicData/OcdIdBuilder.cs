@@ -27,14 +27,14 @@ namespace OpenCivicData
 
         public OcdIdBuilder State(string state)
         {
-            var subdivision = state switch
+            var subdivision = state.ToLower() switch
             {
-                "DC" => "district",
-                "AS" => "territory",
-                "GU" => "territory",
-                "MP" => "territory",
-                "PR" => "territory",
-                "VI" => "territory",
+                "dc" => "district",
+                "as" => "territory",
+                "gu" => "territory",
+                "mp" => "territory",
+                "pr" => "territory",
+                "vi" => "territory",
                 _ => "state"
             };
 
