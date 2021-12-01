@@ -56,7 +56,7 @@ namespace OpenCivicData
         {
             var builder = new OcdIdBuilder();
             build(builder);
-            return new OcdId("jurisdiction", string.Join('/', builder.GetPath().OfType<object>().Append(classification)));
+            return new OcdId("jurisdiction", string.Join('/', builder.GetPath().Append(classification)));
         }
 
         public static OcdId Government(Action<OcdIdBuilder> build)
