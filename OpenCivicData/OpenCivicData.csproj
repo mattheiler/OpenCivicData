@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<PackageId>OpenCivicData</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Authors>Matt Heiler</Authors>
+		<RepositoryUrl>https://github.com/mattheiler/OpenCivicData</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+</Project>
