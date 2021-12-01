@@ -6,72 +6,97 @@ namespace OpenCivicData
 {
     public sealed class OcdId
     {
-        private readonly object[] _data;
-        private readonly string _prefix;
+        private readonly string[] _path;
+        private readonly string _type;
 
-        private OcdId(string prefix, IEnumerable<object> data)
-            : this(prefix, data.ToArray())
+        private OcdId(string type, IEnumerable<string> path)
+        {
+            _type = type;
+            _path = path.ToArray();
+        }
+
+        private OcdId(string type, params string[] path)
+            : this(type, path.AsEnumerable())
         {
         }
 
-        private OcdId(string prefix, params object[] data)
+        public static OcdId Parse(string value)
         {
-            _prefix = prefix;
-            _data = data;
+            return TryParse(value, out var id) ? id : throw new InvalidOperationException("Couldn't parse OCD Id");
         }
 
-        public static OcdId Division(Action<OcdIdAreaBuilder> build)
+        public static bool TryParse(string value, out OcdId id)
         {
-            var areas = new OcdIdAreaBuilder();
-            build(areas);
-            return new OcdId("ocd-division", string.Join('/', areas.GetAreas()));
+            var parts = value.Split('/');
+            if (parts.Length < 2)
+            {
+                id = default;
+                return false;
+            }
+
+            var part = parts[0];
+            if (!part.StartsWith("ocd-"))
+            {
+                id = default;
+                return false;
+            }
+
+            id = new OcdId(part[4..], parts.Skip(1).ToArray());
+            return true;
         }
 
-        public static OcdId Jurisdiction(Action<OcdIdAreaBuilder> build, string classification)
+        public static OcdId Division(Action<OcdIdBuilder> build)
         {
-            var areas = new OcdIdAreaBuilder();
-            build(areas);
-            return new OcdId("ocd-jurisdiction", string.Join('/', areas.GetAreas().OfType<object>().Append(classification)));
+            var builder = new OcdIdBuilder();
+            build(builder);
+            return new OcdId("division", string.Join('/', builder.GetPath()));
         }
 
-        public static OcdId Government(Action<OcdIdAreaBuilder> build)
+        public static OcdId Jurisdiction(Action<OcdIdBuilder> build, string classification)
+        {
+            var builder = new OcdIdBuilder();
+            build(builder);
+            return new OcdId("jurisdiction", string.Join('/', builder.GetPath().OfType<object>().Append(classification)));
+        }
+
+        public static OcdId Government(Action<OcdIdBuilder> build)
         {
             return Jurisdiction(build, "government");
         }
 
-        public static OcdId Legislature(Action<OcdIdAreaBuilder> build)
+        public static OcdId Legislature(Action<OcdIdBuilder> build)
         {
             return Jurisdiction(build, "legislature");
         }
 
-        public static OcdId Executive(Action<OcdIdAreaBuilder> build)
+        public static OcdId Executive(Action<OcdIdBuilder> build)
         {
             return Jurisdiction(build, "executive");
         }
 
-        public static OcdId SchoolSystem(Action<OcdIdAreaBuilder> build)
+        public static OcdId SchoolSystem(Action<OcdIdBuilder> build)
         {
             return Jurisdiction(build, "school_system");
         }
 
-        public static OcdId TransitAuthority(Action<OcdIdAreaBuilder> build)
+        public static OcdId TransitAuthority(Action<OcdIdBuilder> build)
         {
             return Jurisdiction(build, "transit_authority");
         }
 
         public static OcdId Organization(Guid id)
         {
-            return new OcdId("ocd-organization", id.ToString());
+            return new OcdId("organization", id.ToString());
         }
 
         public static OcdId Person(Guid id)
         {
-            return new OcdId("ocd-person", id.ToString());
+            return new OcdId("person", id.ToString());
         }
 
         public override string ToString()
         {
-            return $"{_prefix}/{string.Join('/', _data)}".ToLower();
+            return $"ocd-{_type}/{string.Join('/', _path)}".ToLower();
         }
 
         public static implicit operator string(OcdId id)
